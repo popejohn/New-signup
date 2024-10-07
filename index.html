@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="signupAss.css">
+    <title>Sign Up</title>
+</head>
+<body>
+        
+    <div id="container">
+        <h2>Sign up</h2>
+        <div id="containerText">
+        <input type="text" placeholder="Full Name" id="user" required>
+        <input type="tel" id="email" placeholder="Email" required onchange="suggest()">
+        <div id="usernameDiv">
+            <input type="text" id="username" autocomplete="username" placeholder="Username">
+        </div>
+        <input type="text" id="url-collect" placeholder="Input work url">
+        <hr>
+        <div id="password">
+            <div style="width: 100%; position: relative;">
+                <input type="password" id="password1" autocomplete="current-password" placeholder="Password" required>
+                <button value = 'show' id="show"> show </button>
+            </div>
+            <input type="password" id="password2" autocomplete="new-password" placeholder="Confirm password" required>
+        </div>
+        <div style="margin-top: 5px;">
+
+            <input type="checkbox" id="checkbox" style="height: 15px; width: 15px;"><span style="color: white;">Agree to <a href="#" style="color: rgb(142, 142, 253);">terms and conditions</a></span>
+        </div>
+        
+        <button onclick="signup(event)" id="button"> Sign Up </button>
+        <div>
+            <p style="color: white; font-style: italic;">Have an account? <a id="signIn" style="font-size: medium;">Sign in</a></p>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
+<script>
+    let nameInput = document.querySelector('#user');
+    let emailInput =  document.querySelector('#email');
+    let usernameInput = document.querySelector('#username');
+    let passwordInput = document.querySelector('#password1');
+    let confirmInput = document.querySelector('#password2');
+    let checkedBox = document.getElementById('checkbox');
+    let divTag = document.createElement('div');
+    let span2 = document.createElement('span');
+    let contain = document.querySelector('#container');
+    let urlInput = document.querySelector('#url-collect')
+
+
+// Function to suggest usernmae to the user
+// Pick any of his names raandomly and combines with a random number
+    function suggest() {
+    if (!nameInput.value.trim()){
+        alert('Please input a name')
+    }else{
+        // grab value inside name and split 
+        let nameSplit = nameInput.value.split(' ')
+    
+        let index = Math.floor(Math.random()* (nameSplit.length))
+        let num =  Math.floor(Math.random()* 1001 + 10)
+        
+        divTag.innerHTML = `<div><span style="font-size: small; color: orange;">suggested username:</span><span id="nameIt">${nameSplit[index] + num}</span></div>
+        <button onclick="use()" style="width: fit-content; height: fit-content; padding: 3px; margin-top: -1px; background-color: rgb(159, 200, 250)"> use </button>`
+        document.querySelector('#usernameDiv').appendChild(divTag)
+        divTag.id = 'spanId'
+        divTag.style.color = 'white'
+        divTag.style.fontStyle = 'italic'
+        divTag.style.width = '80%'
+        divTag.style.display = 'flex'
+        divTag.style.flexDirection = 'row'
+        divTag.style.alignItems ='center'
+        divTag.style.justifyContent = 'space-between'
+        divTag.style.gap = '20px'
+        divTag.style.marginTop = '3px'
+    }
+}//End of suggest() function
+
+
+// Function that allows user to use the suggested username
+function use() {
+    usernameInput.value = document.getElementById('nameIt').innerText
+    divTag.innerHTML = ''
+} //End of use() function
+
+
+// function that clears suggested username if the user decides to type his/her preferred username
+usernameInput.addEventListener('change', ()=>{
+   
+        divTag.innerHTML = ''
+})
+
+
+// Let's write regex rules for password, email and user's url
+
+let passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&^])[A-Za-z\d@.#$!%*?&]{8,}$/;
+let emailRegex = /^\w+@[a-zA-Z]+([.][a-zA-Z]+){1,2}$/
+let urlRegex = /^https:/
+
+
+// Function to show password
+
+let show = true
+let showBut = document.getElementById('show')
+showBut.addEventListener('click', ()=>{
+    if (passwordInput.value.trim()===''){
+        return
+    }
+    if (show){
+        showBut.innerHTML = 'hide'
+        passwordInput.type = 'text'
+
+        show = false
+    }else{
+        showBut.innerHTML = 'show'
+        passwordInput.type = 'password'
+
+        show = true
+    }
+})
+
+// Now let's work with the user's provided info
+let dataBase = JSON.parse(localStorage.getItem('dataBase')) || []
+
+
+function signup(ev) {
+    // validation
+    // Validate the input fields
+    if (nameInput.value.trim()== '' || emailInput.value.trim()== '' || passwordInput.value.trim()== ''){
+         alert('All fields are mandatory')
+         return
+    }
+
+    // Test for all possible validation cases
+    // All fields are filled, passwords match, suggested usrname is used but box for terms is not checked
+
+    if (checkedBox.checked === false) {
+        alert('you must agree to terms and conditions to proceed')
+
+    }else if (passwordInput.value.trim() !== confirmInput.value.trim()){
+        span2.innerText = 'passwords must match'
+        document.getElementById('password').appendChild(span2)
+        span2.style.color = 'rgb(183, 183, 248)'
+        span2.style.fontSize = 'small'
+        span2.style.fontStyle = 'italic'
+
+    
+    } else if (!passwordRegex.test(passwordInput.value)){
+        // Testing if the password follows the given format
+        span2.innerText = 'password must contain at least one number, capital letter and one special character'
+        document.getElementById('password').appendChild(span2)
+        span2.style.color = 'rgb(220, 200, 248)'
+        span2.style.fontSize = 'small'
+        span2.style.fontStyle = 'italic'
+
+        checkedBox.checked = false
+    }else if (!emailRegex.test(emailInput.value)){
+        // Email check
+        alert('please input a valid email address')
+    }else if(urlInput.value.trim() === ''){
+        alert('Input a work url')
+    }else if(!urlRegex.test(urlInput.value)){
+        alert('This url is not secured. It should start with "https"')
+    }else{
+        ev.target.innerText = 'Loading...';
+        ev.target.style.backgroundColor = 'orange';
+
+        let filterArray = dataBase.filter((obj)=> obj.email == emailInput.value)
+
+        if (filterArray.length > 0){
+                setTimeout(() => {
+                alert('A user with this email already exist, please proceed to login or register with another email')
+                document.querySelector('#button').innerHTML = 'Sign Up'
+                document.querySelector('#button').style.backgroundColor = 'yellow'
+                nameInput.value = ''
+                emailInput.value = ''
+                usernameInput.value = ''
+                passwordInput.value = ''
+                confirmInput.value= ''
+                urlInput.value = ''
+                checkedBox.checked = false
+                showBut.innerHTML = 'show'
+            }, 1000);
+            
+        }else{
+            setTimeout(() => {
+            dataBaseFill()
+
+            localStorage.setItem('dataBase', JSON.stringify(dataBase))
+            window.location.href = 'sign-in.html'
+            console.log(filterArray);
+            
+            
+        }, 3000);
+        }
+        
+    }
+}
+
+
+
+
+// Create the object for the user's data and push into the database
+
+function dataBaseFill(){
+
+        let obj = {
+            name : nameInput.value,
+            email: emailInput.value,
+            username: usernameInput.value,
+            password: passwordInput.value,
+            loggedIn: false,
+            url: urlInput.value
+        }
+
+        dataBase.push(obj)
+
+        nameInput.value = ''
+        emailInput.value = ''
+        usernameInput.value = ''
+        passwordInput.value = ''
+        confirmInput.value= ''
+        urlInput.value = ''
+        checkedBox.checked = false
+        showBut.innerHTML = 'show'
+
+        document.querySelector('#button').innerHTML = 'Sign Up'
+        document.querySelector('#button').style.backgroundColor = 'yellow'
+
+        divTag.innerHTML = ''
+        span2.innerText = ''
+    }
+
+    // Write a function for signing in
+
+    </script>

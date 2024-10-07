@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="signupAss.css">
+    <title>Sign in page</title>
+</head>
+<body>
+    <div id="container">
+        <h2>Sign in</h2>
+        <div id="containerText">
+            <input type="tel" id="email-in" placeholder="Email" required>
+            <input type="password" id="password1" autocomplete="current-password" placeholder="Password" required> 
+        
+            <button onclick="signIn(event)"> Sign in </button>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+
+
+let signEmail = document.getElementById('email-in')
+let signPassword =  document.getElementById('password1')
+
+let userInfo = JSON.parse(localStorage.getItem('dataBase'))
+    
+function signIn(params) {
+
+        let objectCollector = userInfo.filter((ob)=> {
+            return ob.email === signEmail.value
+            
+        })
+        
+        // validation
+
+        if (signEmail.value.trim() == '' || signPassword.value.trim() == ''){
+            alert('Please input your email and password')
+            return
+        }
+
+        if (objectCollector.length === 0){
+            params.target.innerText = 'Loading...';
+            params.target.style.backgroundColor = 'orange';
+
+            setTimeout(() => {
+                alert('Not a registered user. Please sign up')
+                
+                params.target.innerText = 'Sign in';
+                params.target.style.backgroundColor = 'yellow';
+                window.location.href = 'signupAssignment.html'
+            }, 3000);
+            
+            return
+           
+        }
+        
+        if (objectCollector[0].password === signPassword.value){
+            params.target.innerText = 'Loading...';
+            params.target.style.backgroundColor = 'orange';
+
+                setTimeout(() => {    
+                params.target.innerText = 'Sign in';
+                params.target.style.backgroundColor = 'yellow';
+                window.location.href = 'dashboard.html';
+                
+                signEmail.value = ''
+                signPassword.value = ''
+
+                window.location.href = 'dashboard.html'
+            }, 3000);
+            objectCollector[0].loggedIn = true;
+
+        }else{
+            params.target.innerText = 'Loading...';
+            params.target.style.backgroundColor = 'orange';
+
+            setTimeout(() => {
+                alert('Incorrect email or password')
+
+            signEmail.value = ''
+            signPassword.value = ''
+            params.target.innerText = 'Sign in';
+            params.target.style.backgroundColor = 'yellow';
+            }, 3000);
+        }
+        
+    }
+</script>
